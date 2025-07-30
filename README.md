@@ -1,2 +1,2 @@
 # NMaCh-TP
-Networked Markov Chain model for Tipping Point risk assessment
+Networked Markov Chain model for Tipping Point risk assessment. Each tipping point is modelled as a two-state Markov chain in which its transition rates are affected by the state of its in-neighbours. In particular a destabilising in-neighbour (which is in the degraded state) will increase the collapse rate, while a stabilising in-neighbour (again, in its degraded state) will decrease the collapse rate.
