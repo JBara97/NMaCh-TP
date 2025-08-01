@@ -1,5 +1,7 @@
 Index ordering of the tipping elements:
-{'REEF': 0, 'ASI': 1, 'PERM': 2, 'AMOC': 3, 'WAM': 4, 'AMAZ': 5, 'ENSO': 6, 'WAIS': 7, 'GIS': 8}
+['AMAZ', 'AMOC', 'ASI', 'ENSO', 'GIS', 'PERM', 'REEF', 'WAIS', 'WAM']
 
-Random seed 1850201420152350
-(use np.random.default_rng(seed=1850201420152350))
+## Sampling:
+seed = 45643564852856852352111
+sampler = qmc.LatinHypercube(d=len(df_W24),rng=Generator(PCG64(seed)))
+sample = sampler.random(n=500) # still in a [0,1]^18 hypercube 500 samples!
