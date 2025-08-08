@@ -1,6 +1,7 @@
 import scipy as sp
 from scipy.stats import qmc
 from numpy.random import Generator, PCG64
+import pandas as pd
 
 no_samples = 500
 no_edges = 17
