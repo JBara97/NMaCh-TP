@@ -193,3 +193,34 @@ def lighten_color(color, amount=0.5):
         c = color
     c = colorsys.rgb_to_hls(*mc.to_rgb(c))
     return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
+
+def TE_9x9_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=True,sharey=False, 
+               TE_ordered=['AMOC', 'WAM', 'REEF',
+                           'ENSO', 'AMAZ','PERM',
+                           'GIS', 'WAIS', 'ASI'], 
+               subfig_lab_loc=(0.95,0.05), ha='right',va='bottom',
+               fontsize=12, 
+               bbox=dict(fc='white', edgecolor='0.7',boxstyle='round')):
+    fig,axs = plt.subplots(figsize=figsize,sharex=sharex,sharey=sharey,ncols=3,nrows=3)
+    fig.subplots_adjust(hspace=0.05)
+    letters = ['(%s)'%l for l in 'abcdefghi']
+    for i in range(9):
+        axs[i//3,i%3].grid(visible=True,lw=0.5,axis='y')
+        axs[i//3,i%3].annotate(letters[i] + ' '+ TE_ordered[i],
+                               subfig_lab_loc,
+                               xycoords='axes fraction',
+                               ha=ha, va=va,
+                               fontsize=fontsize,
+                               bbox=bbox)
+    for i in range(3):
+        axs[-1,i].set_xlabel(xlabel)
+        axs[i,0].set_ylabel(ylabel)
+    return fig,axs
+
+def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3]):
+    for i in range(len(quantiles)):
+        ax.fill_between(x, np.quantile(y,quantiles[i], axis=axis), 
+                        np.quantile(y,1-quantiles[i],axis=axis)  , 
+                        color=lighten_color(color,shade[i]),
+                        alpha=alpha[i], edgecolor='none')
+    return
