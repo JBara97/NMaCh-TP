@@ -1,6 +1,4 @@
 import numpy as np
-import colorsys
-import matplotlib.colors as mc
 import scipy as sp
 
 ### Functions for dynamics!
@@ -162,6 +160,10 @@ def stat_dist_theory(A,q_c,q_r,T,T_lim,beta):
     return sp.optimize.fsolve(stat_dist_theory_res, np.ones(9), args=(A,temp_response(T, T_lim,beta)*q_c,q_r))
 
 ### Utility functions for plotting
+import matplotlib.pyplot as plt
+import colorsys
+import matplotlib.colors as mc
+
 def lighten_color(color, amount=0.5):
     """
     Lightens the given color by multiplying (1-luminosity) by the given amount.
@@ -202,12 +204,18 @@ def TE_9x9_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=T
     fig,axs = plt.subplots(figsize=figsize,sharex=sharex,sharey=sharey,ncols=3,nrows=3)
     fig.subplots_adjust(hspace=0.05)
     letters = ['(%s)'%l for l in 'abcdefghi']
+    if len(subfig_lab_loc) == 2:
+        subfig_lab_loc = [subfig_lab_loc]*9
+    if type(ha)==str:
+        ha=[ha]*9
+    if type(va)==str:
+        va=[va]*9
     for i in range(9):
         axs[i//3,i%3].grid(visible=True,lw=0.5,axis='y')
         axs[i//3,i%3].annotate(letters[i] + ' '+ TE_ordered[i],
-                               subfig_lab_loc,
+                               subfig_lab_loc[i],
                                xycoords='axes fraction',
-                               ha=ha, va=va,
+                               ha=ha[i], va=va[i],
                                fontsize=fontsize,
                                bbox=bbox)
     for i in range(3):
@@ -215,10 +223,11 @@ def TE_9x9_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=T
         axs[i,0].set_ylabel(ylabel)
     return fig,axs
 
-def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3]):
+def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3],
+                edgecolor='none'):
     for i in range(len(quantiles)):
         ax.fill_between(x, np.quantile(y,quantiles[i], axis=axis), 
                         np.quantile(y,1-quantiles[i],axis=axis)  , 
                         color=lighten_color(color,shade[i]),
-                        alpha=alpha[i], edgecolor='none')
+                        alpha=alpha[i], edgecolor=edgecolor)
     return
