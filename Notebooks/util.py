@@ -6,7 +6,7 @@ import scipy as sp
 ### Functions for dynamics!
 def environmental_update(D,A,pc,pr):
     """ 
-    update_equation updates the probability(ies) to be degraded, D, by one time step, 
+    environmental_update updates the probability(ies) to be degraded, D, by one time step, 
     given the interaction matrix A, collapse rate pc and recovery rate pr. 
     Quicker version to go into wrappers and other fns
 
@@ -32,7 +32,7 @@ def environmental_update(D,A,pc,pr):
     >>> update_equation(np.zeros(2), np.array( [[0, 4], [-2, 0]] ),np.array([0.2, 0.9]))
     np.array([0.2, 0.9]) 
 
-    For numnerical examples see update_equation
+    For numerical examples see update_equation
     """
     return (1+np.dot(np.maximum(A,0),D))*pc*(1-D)/(1+np.dot(np.maximum(-A,0),D)) + (1-pr)*D
 
@@ -124,7 +124,6 @@ def evolve(D_init, A, no_time_steps,
         elif (T is None) or (beta is None) or (T_lim is None):
             # if any of T,T_lim,beta are None, then pc = 1/(tau_c+1)
             pc = np.ones((len(D_init), no_time_steps))/(tau_c.reshape(len(D_init),1)+1)
-            # print('Non-critical error: at least one of T, T_lim or beta has not been provided.')
         else:
             pc = np.ones((len(D_init), no_time_steps))
             pc /= (tau_c.reshape(len(D_init),1)+1)
@@ -140,7 +139,6 @@ def evolve(D_init, A, no_time_steps,
             pr = 1/(tau_r+1)
     if np.any(pr>1) or np.any(pr<0):
         raise ValueError("Recovery probability pr not in [0,1]")
-    # print(pr.shape)
     if order_ST:
         A = A.transpose()
 
