@@ -145,7 +145,7 @@ def evolve(D_init, A, no_time_steps,
         A = A.transpose()
 
     for t in range(1,no_time_steps):
-        D_out[:,t] = update_equation_quick(D_out[:,t-1],A,pc[:,t-1],pr)
+        D_out[:,t] = environmental_update(D_out[:,t-1],A,pc[:,t-1],pr)
 
     return D_out
 
