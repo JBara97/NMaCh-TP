@@ -194,13 +194,39 @@ def lighten_color(color, amount=0.5):
     c = colorsys.rgb_to_hls(*mc.to_rgb(c))
     return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
 
-def TE_9x9_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=True,sharey=False, 
+def TE_3x3_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=True,sharey=False, 
                TE_ordered=['AMOC', 'WAM', 'REEF',
                            'ENSO', 'AMAZ','PERM',
                            'GIS', 'WAIS', 'ASI'], 
                subfig_lab_loc=(0.95,0.05), ha='right',va='bottom',
                fontsize=12, 
                bbox=dict(fc='white', edgecolor='0.7',boxstyle='round')):
+    """
+    Produces a 3 x 3 figure where each subfigure is labelled with the tipping element name. 
+    Moreover the xlabel(s) and ylabel(s) will be displayed
+
+    Parameters (optional)
+    ---
+    xlabel, ylabel : str
+    figsize : 2-tupple
+    sharex,sharey : Bool
+    TE_ordered : list or array
+        Ordered list of tipping elements, this will form the label for each subfigure
+    subfig_lab_loc : tupple or list of tupples
+        If tupple must be a 2-tupple which gives the (x,y)-position for all subfigure labels
+        Else, must be a list of such 2-tupple positions
+    ha,va : str or list of str
+        If str gives the shared text alignment for horizontal (ha) or vertical (va).
+        If list of str must be of 9 such strings.
+    fontsize : number
+    bbox : dictionary for bbox attributes for the subfigure labels
+
+    Returns
+    ---
+    fig : matplotlib.figure.Figure
+    axs : numpy.ndarray
+        3 x 3 array where each element is a matplotlib.axes._axes.Axes
+    """
     fig,axs = plt.subplots(figsize=figsize,sharex=sharex,sharey=sharey,ncols=3,nrows=3)
     fig.subplots_adjust(hspace=0.05)
     letters = ['(%s)'%l for l in 'abcdefghi']
@@ -225,6 +251,36 @@ def TE_9x9_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=T
 
 def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3],
                 edgecolor='none'):
+    """
+    Plots ribbon plot(s) on axis ax for x-values x and data y.
+    For each quantile in quantiles:
+        a ribbon plot will be produced whose lower value is the quantile and upper value is 1-quantile, 
+        i.e. symmetric quantiles around 0.5
+
+    Parameters (required)
+    ---
+    ax : matplotlib.axes._axes.Axes
+        Axis to draw in
+    x : 1D array-like
+        x-values. Must have the same length as one of the axes of y (specifically not the one in "axis")
+    y : numpy.ndarray
+        y-values. Needs to have at least 2 dimensions:
+            one to plot over which has the same length as "x"
+            the other(s) are the dimensions over which the quantiles are taken
+    
+    Parameters (optional)
+    ---
+    axis : int or tupple of int
+        the axis or axes over which the quantiles will be taken
+    quantiles : tupple/list of floats in [0,1]
+        List of lower quantiles to plot. The upper values are calculated automatically by 1-quantile
+    color : str
+    shade, alpha : float
+        list of shades/alpha-values. Each value corresponds to a ribbon plot specified by quantiles. 
+        Must have the same length as quantiles
+    edgecolor : str
+        shared edgecolor for all ribbon plots
+    """
     for i in range(len(quantiles)):
         ax.fill_between(x, np.quantile(y,quantiles[i], axis=axis), 
                         np.quantile(y,1-quantiles[i],axis=axis)  , 
