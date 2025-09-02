@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+from util.dynamics import temp_response
 ### Stationary distribution
 def stat_dist_theory_res(D,*data):
     A,q_c,q_r = data
@@ -11,5 +12,5 @@ def stat_dist_theory_res(D,*data):
     out = D - (1+x_pos)*q_c/((1+x_pos)*q_c + (1+x_neg)*q_r)
     return out
 
-def stat_dist_theory(A,q_c,q_r,T,T_lim,beta):
-    return sp.optimize.fsolve(stat_dist_theory_res, np.ones(9), args=(A,temp_response(T, T_lim,beta)*q_c,q_r))
+def stat_dist_theory(A,q_c,p_r,T,T_lim,beta):
+    return sp.optimize.fsolve(stat_dist_theory_res, np.ones(9), args=(A,temp_response(T, T_lim,beta)*q_c,p_r))

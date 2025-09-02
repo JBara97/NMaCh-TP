@@ -53,6 +53,7 @@ def temp_response(T,T_lim,beta):
     """
     return 1/(1+np.exp(beta*(T_lim-T)))
 
+### evolve doesn't currently work... so use something else
 def evolve(D_init, A, no_time_steps, 
            order_ST=True, 
            pc = None, tau_c = None, 
@@ -60,6 +61,7 @@ def evolve(D_init, A, no_time_steps,
            pr = None, tau_r = None,
            ):
     """ 
+    NEEDS FIXING, DO NOT USE.
     Wrapper to evolve system up to and including t = no_time_steps, 
     with an initial value of D_init at time t=0. 
 
