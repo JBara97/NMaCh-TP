@@ -31,6 +31,7 @@ def environmental_update(D,A,pc,pr):
     """
     return (1+np.dot(np.maximum(A,0),D))*pc*(1-D)/(1+np.dot(np.maximum(-A,0),D)) + (1-pr)*D
 
+
 def temp_response(T,T_lim,beta):
     """ 
     Returns the response in collapse rate to a temperature T, 
@@ -51,9 +52,9 @@ def temp_response(T,T_lim,beta):
     """
     return 1/(1+np.exp(beta*(T_lim-T)))
 
-### evolve doesn't currently work... so use something else
+
 def evolve(D_init, A, no_time_steps, 
-           order_ST=True, 
+           order_ST=False, 
            pc = None, tau_c = None, 
            T = None, beta = None, T_lim = None,
            pr = None, tau_r = None,
@@ -80,7 +81,7 @@ def evolve(D_init, A, no_time_steps,
         The indexing order of the adjacent matrix. 
         If True, then the adjacency matrix will be read with an index-order that gives A[source, target].
         Otherwise the order will be assumed as A[target, source]
-        Default True.
+        Default False.
     pc : numpy.array or something broadcastable
         The array/list/collection of collapse rates (without interactions). 
         Will supercede any calls to tau_c or T
@@ -123,7 +124,7 @@ def evolve(D_init, A, no_time_steps,
             pc = np.ones((len(D_init), no_time_steps))/(tau_c.reshape(len(D_init),1)+1)
         else:
             pc = np.ones((len(D_init), no_time_steps))
-            pc /= (tau_c.reshape(len(D_init),1)+1)
+            pc /= (1+ tau_c.reshape(len(D_init),1))
             for t in range(no_time_steps):
                 pc[:,t] *= temp_response(T[t], T_lim, beta)
     if np.any(pc>1) or np.any(pc<0):
@@ -140,6 +141,6 @@ def evolve(D_init, A, no_time_steps,
         A = A.transpose()
 
     for t in range(1,no_time_steps):
-        D_out[:,t] = environmental_update(D_out[:,t-1],A,pc[:,t-1],pr)
+        D_out[:,t] = environmental_update(D_out[:,t-1],A,pc[:,t],pr)
 
     return D_out
