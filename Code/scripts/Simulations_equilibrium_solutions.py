@@ -23,9 +23,9 @@ A = [np.loadtxt('../../Data/Interaction matrices/A_%s.csv'%r) for r in range(500
 # Numerically solving the coupled equations for equilibrium distribution
 T = np.arange(0,10,step=0.001) # Range of fixed temperatures
 D_theory = np.array([[stationary.stat_dist_theory(A[r],q_c,p_r,t,T_lim,betas) 
-                     for t in T] for r in tqdm.tqdm(range(500))])
+                     for t in T] for r in (range(500))])
 D_theory_noint = np.array([stationary.stat_dist_theory(np.zeros(9),q_c,p_r,t,T_lim,betas)
-                           for t in tqdm.tqdm(T)])
+                           for t in (T)])
 
 
 ### OLD VERSION IGNORE
