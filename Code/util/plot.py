@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import colorsys
 import matplotlib.colors as mc
+import numpy as np
 
 def lighten_color(color, amount=0.5):
     """
