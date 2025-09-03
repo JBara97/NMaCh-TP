@@ -5,13 +5,12 @@ import scipy as sp
 from scipy.stats import qmc
 
 import sys
-sys.path.insert(1, '/home/jbara/Code/NMaCh-TP/Code/')
+sys.path.insert(1, '../')
 from util import stationary
 
 # --------- READING DATA --------------
 # Reading data about individual tipping elements:
-folder_data = '../../Data/'
-df_TEs = pd.read_excel(folder+'TEsummary.xlsx',header=[0],index_col=0)
+df_TEs = pd.read_excel('../../Data/TEsummary.xlsx',header=[0],index_col=0)
 T_lim = df_TEs['Threshold (°C) – Est.'].to_numpy() # Critical threshold for tipping
 betas = df_TEs['Beta (1/°C)'].to_numpy() # Logistic parameter (temp. sensitivity)
 q_c = 1/(1+df_TEs['Collapse (years)'].to_numpy()) # collapse leverage

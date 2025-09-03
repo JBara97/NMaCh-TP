@@ -4,7 +4,7 @@ import io
 import scipy as sp
 
 import sys
-sys.path.insert(1, '/home/jbara/Code/NMaCh-TP/Code/')
+sys.path.insert(1, '../')
 from util.dynamics import environmental_update
 from util.dynamics import temp_response
 
