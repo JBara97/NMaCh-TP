@@ -28,8 +28,6 @@ def environmental_update(D,A,pc,pr):
     For an initial vector of zeros, regardless of the interaction matrix, D_out will always be pc
     >>> update_equation(np.zeros(2), np.array( [[0, 4], [-2, 0]] ),np.array([0.2, 0.9]))
     np.array([0.2, 0.9]) 
-
-    For numerical examples see update_equation
     """
     return (1+np.dot(np.maximum(A,0),D))*pc*(1-D)/(1+np.dot(np.maximum(-A,0),D)) + (1-pr)*D
 
