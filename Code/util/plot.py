@@ -90,7 +90,7 @@ def TE_3x3_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=T
     return fig,axs
 
 def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3],
-                edgecolor='none'):
+                edgecolor='none',label=['$(P_5,P_{95})$']):
     """
     Plots ribbon plot(s) on axis ax for x-values x and data y.
     For each quantile in quantiles:
@@ -125,5 +125,5 @@ def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3],
         ax.fill_between(x, np.quantile(y,quantiles[i], axis=axis), 
                         np.quantile(y,1-quantiles[i],axis=axis)  , 
                         color=lighten_color(color,shade[i]),
-                        alpha=alpha[i], edgecolor=edgecolor)
+                        alpha=alpha[i], edgecolor=edgecolor,label=label[i])
     return
