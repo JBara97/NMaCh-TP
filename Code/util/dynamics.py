@@ -54,13 +54,12 @@ def temp_response(T,T_lim,beta):
 
 
 def evolve(D_init, A, no_time_steps, 
-           order_ST=False, 
+           order_ST=True, 
            pc = None, tau_c = None, 
            T = None, beta = None, T_lim = None,
            pr = None, tau_r = None,
            ):
     """ 
-    NEEDS FIXING, DO NOT USE.
     Wrapper to evolve system up to and including t = no_time_steps, 
     with an initial value of D_init at time t=0. 
 
@@ -81,7 +80,7 @@ def evolve(D_init, A, no_time_steps,
         The indexing order of the adjacent matrix. 
         If True, then the adjacency matrix will be read with an index-order that gives A[source, target].
         Otherwise the order will be assumed as A[target, source]
-        Default False.
+        Default True.
     pc : numpy.array or something broadcastable
         The array/list/collection of collapse rates (without interactions). 
         Will supercede any calls to tau_c or T
@@ -144,3 +143,101 @@ def evolve(D_init, A, no_time_steps,
         D_out[:,t] = environmental_update(D_out[:,t-1],A,pc[:,t],pr)
 
     return D_out
+
+def evolve_feedback(D_init, A, no_time_steps, 
+           order_ST=True, 
+           pc = None, tau_c = None, 
+           T = None, beta = None, T_lim = None,
+           pr = None, tau_r = None, impact = None
+           ):
+    """ 
+    Wrapper to evolve system up to and including t = no_time_steps, 
+    with an initial value of D_init at time t=0, taking into account the warming feedbacks due to tipping impacts.
+
+    Parameters (required)
+    ---
+    D_init : numpy.array
+        The initial array of degraded probabilities at time step 0
+    A : numpy.array
+        The interaction matrix (i.e. adjacency matrix), must be of shape (len(D_init), len(D_init)). 
+        No self loops, i.e. all diagonal elements should be 0. 
+    no_time_steps : int
+        The number of time steps to simulate over, 
+        i.e. the number of times the update equation is successively applied. 
+        Must be >= 1
+    
+    Parameters (optional):
+    order_ST : Bool
+        The indexing order of the adjacent matrix. 
+        If True, then the adjacency matrix will be read with an index-order that gives A[source, target].
+        Otherwise the order will be assumed as A[target, source]
+        Default True.
+    pc : numpy.array or something broadcastable
+        The array/list/collection of collapse rates (without interactions). 
+        Will supercede any calls to tau_c or T
+        Must be in [0,1]. 
+    tau_c :  numpy.array or something broadcastable
+        The array/list/collection of collapse time scales. 
+    T : array-like
+        The global temperature(s) at which to evaluate. 
+        Must be of length >= no_time_steps. Must have beta and T_lim supplied as well if not None
+    beta : array-like or float
+        Temperature sensitivities (i.e. logistic parameters) for individual tipping points.
+        If array-like must be of length len(D_init). 
+    T_lim : array-like or float
+        Critical temperature thresholds for individual tipping points.
+        If array-like must be of length len(D_init)
+    pr : numpy.array or something broadcastable
+        The array/list/collection of collapse rates. Will supercede tau_r
+    tau_r : numpy.array or something broadcastable
+        The array/list/collection of collapse time scales
+    impact: numpy.array
+        The array of maximum (in absolute) warming impacts for each element tipping.
+        Must be of length len(D_init)
+    
+        
+    Returns
+    ---
+    D_out : numpy.array
+        The output will be a (len(D_init), no_time_steps+1)-shaped array where the D_out[:,0] = D_init
+    Examples
+    ---
+    """
+    ## Initialising D_out
+    D_out = np.zeros((len(D_init), no_time_steps))
+    D_out[:,0] = D_init
+    T_out = np.zeros(len(T))
+    T_out[0] = T[0]
+    
+    ## Changing pc if needed
+    if pc is None:
+        if tau_c is None:
+            raise ValueError("No collapse time scales given")
+            pc = np.ones(len(D_init))/2 ## if nothing is supplied pc will be set to 1/2
+        else:
+            # if any of T,T_lim,beta are None, then pc = 1/(tau_c+1)
+            pc = np.ones((len(D_init), no_time_steps))/(tau_c.reshape(len(D_init),1)+1)
+        # else:
+        #     pc = np.ones((len(D_init), no_time_steps))
+        #     pc /= (tau_c.reshape(len(D_init),1)+1)
+        #     for t in range(no_time_steps):
+        #         pc[:,t] *= temp_response(T[t], T_lim, beta)
+    if np.any(pc>1) or np.any(pc<0):
+        raise ValueError("Collapse probability pc not in [0,1]")
+    ## Changing pr if needed
+    if pr is None:
+        if tau_r is None:  
+            raise ValueError("No recovery time scales given")
+        else:
+            pr = 1/(tau_r+1)
+    if np.any(pr>1) or np.any(pr<0):
+        raise ValueError("Recovery probability pr not in [0,1]")
+    if order_ST:
+        A = A.transpose()
+
+    for t in range(1,no_time_steps):
+        T_out[t] = T[t]+ np.dot(D_out[:,t-1],impact)
+        pc[:,t] *= temp_response(T_out[t], T_lim, beta)
+        D_out[:,t] = environmental_update(D_out[:,t-1],A,pc[:,t],pr)
+
+    return D_out,T_out
