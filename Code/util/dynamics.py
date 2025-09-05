@@ -13,7 +13,7 @@ def environmental_update(D,A,pc,pr):
         The initial array of degraded probabilities
     A : numpy.array
         The interaction matrix (i.e. adjacency matrix), must be of shape (len(D), len(D)). 
-        No self loops, i.e. all diagonal elements should be 0. Must be indexed as A[target,source]
+        No self loops, i.e. all diagonal elements should be 0. Must be indexed as A[source,target]
     pc : numpy.array or something broadcastable
         The array/list/collection of collapse rates. Must be in [0,1]. 
     pr : numpy.array or something broadcastable
@@ -29,7 +29,7 @@ def environmental_update(D,A,pc,pr):
     >>> update_equation(np.zeros(2), np.array( [[0, 4], [-2, 0]] ),np.array([0.2, 0.9]))
     np.array([0.2, 0.9]) 
     """
-    return (1+np.dot(np.maximum(A,0),D))*pc*(1-D)/(1+np.dot(np.maximum(-A,0),D)) + (1-pr)*D
+    return (1+np.dot(np.maximum(A.transpose(),0),D))*pc*(1-D)/(1+np.dot(np.maximum(-A.transpose(),0),D)) + (1-pr)*D
 
 
 def temp_response(T,T_lim,beta):
