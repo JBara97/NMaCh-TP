@@ -89,8 +89,8 @@ def TE_3x3_fig(xlabel='Year',ylabel='Degraded prob. (%)',figsize=(12,9),sharex=T
         axs[i,0].set_ylabel(ylabel)
     return fig,axs
 
-def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3],
-                edgecolor='none',label=['$(P_5,P_{95})$']):
+def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=None,alpha=None,
+                edgecolor='none',label=None,zorder=None):
     """
     Plots ribbon plot(s) on axis ax for x-values x and data y.
     For each quantile in quantiles:
@@ -121,9 +121,17 @@ def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=[1],alpha=[0.3],
     edgecolor : str
         shared edgecolor for all ribbon plots
     """
+    if alpha is None:
+        alpha = [1]*len(quantiles)
+    if shade is None:
+        shade = quantiles
+    if zorder is None:
+        zorder = np.arange(len(quantiles))
+    if label is None:
+        label = ['($P_{%s}, P_{%s}$)'%(int(q*100),int(100-q*100)) for q in quantiles]
     for i in range(len(quantiles)):
         ax.fill_between(x, np.quantile(y,quantiles[i], axis=axis), 
                         np.quantile(y,1-quantiles[i],axis=axis)  , 
                         color=lighten_color(color,shade[i]),
-                        alpha=alpha[i], edgecolor=edgecolor,label=label[i])
+                        alpha=alpha[i], edgecolor=edgecolor,label=label[i],zorder=zorder[i])
     return
