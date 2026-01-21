@@ -148,3 +148,44 @@ def OS_ref(temps,ref=1.5,window=1,tol=0.05):
     else:
         return False 
     return 
+
+def OS_model(t, *args):
+    """ 
+    Stylised overshoot scenario, similar to TIPMIP, but parametrised by 6-parameters.
+
+    Parameters
+    ---
+    t : np.array
+        Vector of time-points
+    T_0 : int or float
+        Initial temperature
+    T_peak : int or float
+        The temperature at the peak
+    T_os : int or float
+        The temperature to return to after the overshoot
+    t_up : int or float
+        The temporal duration of the ramp-up
+    t_plat : int or float
+        The temporal duration of the peak
+    t_down : int or float
+        The temporal duration of the ramp down
+        
+    Returns
+    ---
+    temp : numpy.array
+        The output will be a numpy.array of the same shape as t
+    """
+    T_0,T_peak,T_os,t_up,t_plat,t_down=args
+    out = T_0 + t[t<=t_up]*(T_peak-T_0)/t_up
+    out = np.concatenate([out,[T_peak]*len(t[(t_up<t)&(t<=t_up+t_plat)])])
+    out = np.concatenate([out, T_peak - (t[(t_up+t_plat<t)&(t<=t_down+t_up+t_plat)]-t_up-t_plat)*(T_peak-T_os)/(t_down)])
+    return np.concatenate([out, [T_os]*(len(t)-len(out))])
+
+def local_safety(D,safety_threshold=0.1,
+              dimension_kw=dict(year=-1,sample=1)):
+    return np.max(D,axis=dimension_kw['year'],keepdims=True).mean(axis=dimension_kw['sample'],keepdims=True)<=safety_threshold
+    
+def global_safety(D,safety_threshold=0.1,
+                  dimension_kw=dict(year=-1,sample=1,tipping_element=2)):
+    return local_safety(D,safety_threshold=0.1,
+                  dimension_kw=dimension_kw).mean(axis=tipping_element,keepdims=True)
