@@ -189,3 +189,7 @@ def global_safety(D,safety_threshold=0.1,
                   dimension_kw=dict(year=-1,sample=1,tipping_element=2)):
     return local_safety(D,safety_threshold=0.1,
                   dimension_kw=dimension_kw).mean(axis=tipping_element,keepdims=True)
+
+def critical_parameter(D,pars,axis=0,**kwargs):
+    return np.max(np.squeeze(local_safety(D,**kwargs))*pars.reshape(len(pars),1),
+                  axis=axis)
