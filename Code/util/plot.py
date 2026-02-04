@@ -143,93 +143,92 @@ def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=None,alpha=None,
                         alpha=alpha[i], edgecolor=edgecolor,label=label[i],zorder=zorder[i])
     return
 
-def radar_factory(num_vars, frame='circle'):
-    """
-    Create a radar chart with `num_vars` Axes.
+class Radar(object):
 
-    This function creates a RadarAxes projection and registers it.
+    def __init__(self, fig, titles, rect=None, wedge_width=None,rotate_labels=True, with_rlabels=True, loc_offset=-2,
+                 rticks=None, ylims = None):
+        if rect is None:
+            rect = [0.05, 0.05, 0.95, 0.95]
 
-    Function from Matplotlib documentation: https://matplotlib.org/stable/gallery/specialty_plots/radar_chart.html
+        self.n = len(titles)
+        self.angles = [a if a <=360. else a - 360. for a in np.arange(90, 90+360, 360.0/self.n)] # in degrees
+        self.axes = [fig.add_axes(rect, projection="polar", label="axes%d" % i) 
+                         for i in range(self.n)]
+        self.rticks = rticks
+        if self.rticks is None:
+            self.rticks = [ax.get_yticks() for ax in self.axes]
+        self.ylims = ylims
+        if self.ylims is None:
+            self.ylims = [ax.get_ylim() for ax in self.axes]
 
-    Parameters
-    ----------
-    num_vars : int
-        Number of variables for radar chart.
-    frame : {'circle', 'polygon'}
-        Shape of frame surrounding Axes.
+        self.ax = self.axes[0]
+        self.ax.set_thetagrids(self.angles, labels=titles,)# fontsize=12, weight="bold")
+        self.ax.tick_params(axis='x', which='major', pad=16)
+        self.ax.yaxis.grid(False)
+        self.wedge_width = wedge_width
+        if self.wedge_width is None:
+            self.wedge_width = 360/self.n # width of each wedge in degrees
 
-    """
-    # calculate evenly-spaced axis angles
-    theta = np.linspace(0, 2*np.pi, num_vars, endpoint=False)
+        if rotate_labels:
+            labels = []
+            for label, angle in zip(self.ax.get_xticklabels(),self.angles):
+                x,y = label.get_position()
+                lab = self.ax.text(x,y, label.get_text(), transform=label.get_transform(),
+                              ha='center', va='center')
+                lab.set_rotation(angle-90)
+                labels.append(lab)
+            self.ax.set_xticklabels([])
 
-    class RadarTransform(PolarAxes.PolarTransform):
+        for ax in self.axes[1:]:
+            ax.patch.set_visible(False)
+            ax.grid("off")
+            ax.xaxis.set_visible(False)    
+            ax.yaxis.grid(False)
 
-        def transform_path_non_affine(self, path):
-            # Paths with non-unit interpolation steps correspond to gridlines,
-            # in which case we force interpolation (to defeat PolarTransform's
-            # autoconversion to circular arcs).
-            if path._interpolation_steps > 1:
-                path = path.interpolated(num_vars)
-            return Path(self.transform(path.vertices), path.codes)
+        self.draw_rticks(rticks,loc_offset=loc_offset,width=self.wedge_width,with_label=with_rlabels)
+        self.draw_wedgeticks(ylims=ylims,width=self.wedge_width)
+    
+    ### ------ Radar methods --------
 
-    class RadarAxes(PolarAxes):
+    def plot(self, values, *args, **kw):
+        angle = np.deg2rad(np.r_[self.angles, self.angles[0]])
+        values = np.r_[values, values[0]]
+        self.ax.plot(angle, values, *args, **kw)
 
-        name = 'radar'
-        PolarTransform = RadarTransform
+    def bar(self,values,angles=None,*args,**kw):
+        if angles is None:
+            angles = np.deg2rad(np.r_[self.angles, self.angles[0]])
+        values = np.r_[values, values[0]]
+        for ax, angle, value in zip(self.axes,angles, values):
+            ax.bar(angle,value, *args, **kw)
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            # rotate plot such that the first axis is at the top
-            self.set_theta_zero_location('N')
+    def draw_rticks(self,rticks, loc_offset=0, width=None, with_label=True):
+        if width == None:
+            width=self.wedge_width
+        else:
+            self.wedge_width = width
+        for ax, angle, rtick in zip(self.axes, self.angles, rticks):
+            ax.set_rgrids(rtick, labels = '', angle=angle, fontsize=12)
+            ax.spines["polar"].set_visible(False)
+            ax.set_rticks(rtick)
 
-        def fill(self, *args, closed=True, **kwargs):
-            """Override fill so that line is closed by default"""
-            return super().fill(closed=closed, *args, **kwargs)
+            ax.set_thetagrids([])
+            theta1 = np.deg2rad(angle-width/2)
+            theta2 = theta1 + np.deg2rad(width)
+            for r in ax.get_yticks():
+                ax.plot(np.linspace(theta1,theta2), [r]*50, color='grey',lw = 0.7,zorder=0)
+            if with_label:
+                for rt in rtick:
+                    ax.text(theta1+np.deg2rad(loc_offset),rt,rt,ha='center',va='center')
+        self.rticks = rticks
 
-        def plot(self, *args, **kwargs):
-            """Override plot so that line is closed by default"""
-            lines = super().plot(*args, **kwargs)
-            for line in lines:
-                self._close_line(line)
-
-        def _close_line(self, line):
-            x, y = line.get_data()
-            # FIXME: markers at x[0], y[0] get doubled-up
-            if x[0] != x[-1]:
-                x = np.append(x, x[0])
-                y = np.append(y, y[0])
-                line.set_data(x, y)
-
-        def set_varlabels(self, labels):
-            self.set_thetagrids(np.degrees(theta), labels)
-
-        def _gen_axes_patch(self):
-            # The Axes patch must be centered at (0.5, 0.5) and of radius 0.5
-            # in axes coordinates.
-            if frame == 'circle':
-                return Circle((0.5, 0.5), 0.5)
-            elif frame == 'polygon':
-                return RegularPolygon((0.5, 0.5), num_vars,
-                                      radius=.5, edgecolor="k")
-            else:
-                raise ValueError("Unknown value for 'frame': %s" % frame)
-
-        def _gen_axes_spines(self):
-            if frame == 'circle':
-                return super()._gen_axes_spines()
-            elif frame == 'polygon':
-                # spine_type must be 'left'/'right'/'top'/'bottom'/'circle'.
-                spine = Spine(axes=self,
-                              spine_type='circle',
-                              path=Path.unit_regular_polygon(num_vars))
-                # unit_regular_polygon gives a polygon of radius 1 centered at
-                # (0, 0) but we want a polygon of radius 0.5 centered at (0.5,
-                # 0.5) in axes coordinates.
-                spine.set_transform(Affine2D().scale(.5).translate(.5, .5)
-                                    + self.transAxes)
-                return {'polar': spine}
-            else:
-                raise ValueError("Unknown value for 'frame': %s" % frame)
-
-    register_projection(RadarAxes)
-    return theta
+    def draw_wedgeticks(self,ylims=None,width=None):
+        if ylims is None:
+            ylims = [ax.get_ylim() for ax in self.axes]
+        if width is None:
+            width=self.wedge_width
+        for ax, angle, ylim in zip(self.axes, self.angles, ylims):
+            # ylim=ax.get_ylim()
+            ax.plot([np.deg2rad(angle - width/2)]*2, ylim, color='k',lw = 1,zorder=0)
+            ax.plot([np.deg2rad(angle + width/2)]*2, ylim, color='k',lw = 1,zorder=0)
+            ax.set_ylim(ylim)
