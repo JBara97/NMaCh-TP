@@ -1,5 +1,6 @@
 ### Utility functions for plotting
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import colorsys
 import matplotlib.colors as mc
 import numpy as np
@@ -10,6 +11,7 @@ from matplotlib.projections import register_projection
 from matplotlib.projections.polar import PolarAxes
 from matplotlib.spines import Spine
 from matplotlib.transforms import Affine2D
+import colorcet
 
 def lighten_color(color, amount=0.5):
     """
@@ -144,7 +146,6 @@ def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=None,alpha=None,
     return
 
 class Radar(object):
-
     def __init__(self, fig, titles, rect=None, wedge_width=None,rotate_labels=True, with_rlabels=True, loc_offset=-2,
                  rticks=None, ylims = None):
         if rect is None:
@@ -216,7 +217,7 @@ class Radar(object):
             theta1 = np.deg2rad(angle-width/2)
             theta2 = theta1 + np.deg2rad(width)
             for r in ax.get_yticks():
-                ax.plot(np.linspace(theta1,theta2), [r]*50, color='grey',lw = 0.7,zorder=0)
+                ax.plot(np.linspace(theta1,theta2), [r]*50, color='k',lw = 0.7,zorder=0)
             if with_label:
                 for rt in rtick:
                     ax.text(theta1+np.deg2rad(loc_offset),rt,rt,ha='center',va='center')
@@ -232,3 +233,26 @@ class Radar(object):
             ax.plot([np.deg2rad(angle - width/2)]*2, ylim, color='k',lw = 1,zorder=0)
             ax.plot([np.deg2rad(angle + width/2)]*2, ylim, color='k',lw = 1,zorder=0)
             ax.set_ylim(ylim)
+
+    def wedge_stacked_bar(self, ax, angle, values, 
+                          width=None, c_list=None, 
+                          degrees=True, bottom = None, 
+                          edgecolor='none', alpha=0.7,
+                          **kwargs):
+        if width is None:
+            width=np.deg2rad(self.wedge_width)
+        if degrees:
+            angle=np.deg2rad(angle)
+        if c_list is None:
+            c_list = ['g'] + [c for c in mpl.colormaps['cet_fire_r'](np.linspace(0, 1, len(values)+4))[1:len(values)]]
+        
+        if bottom is None:
+            bottom = ax.get_ylim()[0]
+        for v,c in zip(values,c_list[:len(values)]):
+            ax.bar(angle, v-bottom, 
+                   color=c, 
+                   edgecolor=edgecolor,
+                   alpha=alpha,
+                   width = width,
+                   bottom=bottom, **kwargs)
+            bottom=max(bottom,v)
