@@ -146,14 +146,52 @@ def ribbon_plot(ax,x,y,quantiles=[0.05],axis=0,color='k',shade=None,alpha=None,
     return
 
 class Radar(object):
-    def __init__(self, fig, titles, rect=None, wedge_width=None,rotate_labels=True, with_rlabels=True, loc_offset=-2,
-                 rticks=None, ylims = None):
+    """ 
+    A Radar object for producing a polar chart comprised of n Axes, each of which is a wedge, 
+        sharing the same theta space but with different radial scales.
+
+    Parameters
+    ---
+    fig : matplotlib.figure.Figure
+        the figure which will contain all the axes
+    n : int
+        the number of wedges for the polar chart, i.e. the number of axes
+
+    Parameters (optional)
+    ---
+    titles : list of str
+        the list of titles for the axes/wedges    
+    rect : tuple (left, bottom, width, height)
+        The dimensions (left, bottom, width, height) of the new Axes. All quantities are in fractions of figure width and height.
+    rotate_labels : Bool, default True
+        If True the labels will be rotated to be perpendicular to the central radial axis of each wedge
+    with_rlabels : Bool, default True
+        If True will show the rticks for all axes
+    loc_offset : float
+        The offset in degrees for the rtick labels
+    rticks : list of array-likes
+        rticks for each axis
+    ylims : list of tuples
+        ylims for each axis
+    **kwargs
+        kwargs for fig.add_axes
+    
+    """
+    def __init__(self, fig, n, 
+                 titles=None, rect=None, 
+                 wedge_width=None, rotate_labels=True, 
+                 with_rlabels=True, loc_offset=-2,
+                 rticks=None, ylims = None,**kwargs):
         if rect is None:
             rect = [0.05, 0.05, 0.95, 0.95]
 
-        self.n = len(titles)
+        self.n = n
+        self.titles = titles
+        if self.titles is None:
+            self.titles = ['Var %s'%i for i in range(self.n)]
+        
         self.angles = [a if a <=360. else a - 360. for a in np.arange(90, 90+360, 360.0/self.n)] # in degrees
-        self.axes = [fig.add_axes(rect, projection="polar", label="axes%d" % i) 
+        self.axes = [fig.add_axes(rect, projection="polar", label="axes%d" % i,**kwargs) 
                          for i in range(self.n)]
         self.rticks = rticks
         if self.rticks is None:
