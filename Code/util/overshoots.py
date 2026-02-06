@@ -181,9 +181,32 @@ def OS_model(t, *args):
     out = np.concatenate([out, T_peak - (t[(t_up+t_plat<t)&(t<=t_down+t_up+t_plat)]-t_up-t_plat)*(T_peak-T_os)/(t_down)])
     return np.concatenate([out, [T_os]*(len(t)-len(out))])
 
-def local_safety(D,safety_threshold=0.1,
-              dimension_kw=dict(year=-1,sample=1)):
-    return np.max(D,axis=dimension_kw['year'],keepdims=True).mean(axis=dimension_kw['sample'],keepdims=True)<=safety_threshold
+def local_safety(D,safety_threshold=0.1, 
+                 time=-1,sample=1):
+    """
+    Local safety returns whether the (sample-mean of) time-maximum of 
+        individual tipping risks exceeds the safety_threshold
+
+    Parameters
+    ---
+    D : np.array
+        Risk of tipping risks over time and across (interaction Latin hypercube) samples. 
+    
+    Parameters (optional)
+    ---
+    safety_threshold : float in [0,1], default 0.1
+        the threshold in risk below which it is considered 'safe'
+    time : int
+        which axis of D corresponds to time
+    sample : int
+        which axis of D corresponds to samples over interaction hypercube
+    
+    Returns
+    ---
+    out : numpy.array of Bools
+        The array of Bools of whether the max exceeds the safety_threshold. Has the same dimensions as D
+    """
+    return np.max(D,axis=dimension_kw['time'],keepdims=True).mean(axis=dimension_kw['sample'],keepdims=True)<=safety_threshold
     
 def global_safety(D,safety_threshold=0.1,
                   dimension_kw=dict(year=-1,sample=1,tipping_element=2)):
