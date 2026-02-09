@@ -206,12 +206,14 @@ def local_safety(D,safety_threshold=0.1,
     out : numpy.array of Bools
         The array of Bools of whether the max exceeds the safety_threshold. Has the same dimensions as D
     """
-    return np.max(D,axis=dimension_kw['time'],keepdims=True).mean(axis=dimension_kw['sample'],keepdims=True)<=safety_threshold
+    return np.max(D,axis=time,keepdims=True).mean(axis=sample,keepdims=True)<=safety_threshold
     
-def global_safety(D,safety_threshold=0.1,
-                  dimension_kw=dict(year=-1,sample=1,tipping_element=2)):
+def global_safety(D,safety_threshold=0.1, 
+                  time = -1, 
+                  sample = 1, 
+                  tipping_element = 2):
     return local_safety(D,safety_threshold=0.1,
-                  dimension_kw=dimension_kw).mean(axis=tipping_element,keepdims=True)
+                  time=time, sample=sample).mean(axis=tipping_element,keepdims=True)
 
 def critical_parameter(D,pars,axis=0,**kwargs):
     return np.max(np.squeeze(local_safety(D,**kwargs))*pars.reshape(len(pars),1),
