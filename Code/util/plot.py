@@ -181,7 +181,7 @@ class Radar(object):
                  titles=None, rect=None, 
                  wedge_width=None, rotate_labels=True, 
                  with_rlabels=True, loc_offset=-2,
-                 rticks=None, ylims = None,**kwargs):
+                 rticks=None, ylims = None, rtick_lw=0.5, wedgetick_lw=2,**kwargs):
         if rect is None:
             rect = [0.05, 0.05, 0.95, 0.95]
 
@@ -224,8 +224,12 @@ class Radar(object):
             ax.xaxis.set_visible(False)    
             ax.yaxis.grid(False)
 
-        self.draw_rticks(rticks,loc_offset=loc_offset,width=self.wedge_width,with_label=with_rlabels)
-        self.draw_wedgeticks(ylims=ylims,width=self.wedge_width)
+        self.draw_rticks(rticks,loc_offset=loc_offset,
+                         width=self.wedge_width,
+                         with_label=with_rlabels,
+                         lw=rtick_lw)
+        self.draw_wedgeticks(ylims=ylims,
+                             width=self.wedge_width, lw=wedgetick_lw)
     
     ### ------ Radar methods --------
 
@@ -241,7 +245,7 @@ class Radar(object):
         for ax, angle, value in zip(self.axes,angles, values):
             ax.bar(angle,value, *args, **kw)
 
-    def draw_rticks(self,rticks, loc_offset=0, width=None, with_label=True):
+    def draw_rticks(self,rticks, loc_offset=0, width=None, with_label=True,lw=0.7):
         if width == None:
             width=self.wedge_width
         else:
@@ -255,21 +259,21 @@ class Radar(object):
             theta1 = np.deg2rad(angle-width/2)
             theta2 = theta1 + np.deg2rad(width)
             for r in ax.get_yticks():
-                ax.plot(np.linspace(theta1,theta2), [r]*50, color='k',lw = 0.7,zorder=0)
+                ax.plot(np.linspace(theta1,theta2), [r]*50, color='k',lw = lw,zorder=0)
             if with_label:
                 for rt in rtick:
                     ax.text(theta1+np.deg2rad(loc_offset),rt,rt,ha='center',va='center')
         self.rticks = rticks
 
-    def draw_wedgeticks(self,ylims=None,width=None):
+    def draw_wedgeticks(self,ylims=None,width=None,lw=2):
         if ylims is None:
             ylims = [ax.get_ylim() for ax in self.axes]
         if width is None:
             width=self.wedge_width
         for ax, angle, ylim in zip(self.axes, self.angles, ylims):
             # ylim=ax.get_ylim()
-            ax.plot([np.deg2rad(angle - width/2)]*2, ylim, color='k',lw = 1,zorder=0)
-            ax.plot([np.deg2rad(angle + width/2)]*2, ylim, color='k',lw = 1,zorder=0)
+            ax.plot([np.deg2rad(angle - width/2)]*2, ylim, color='k',lw = lw,zorder=0)
+            ax.plot([np.deg2rad(angle + width/2)]*2, ylim, color='k',lw = lw,zorder=0)
             ax.set_ylim(ylim)
 
     def wedge_stacked_bar(self, ax, angle, values, 
