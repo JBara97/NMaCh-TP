@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import poisson_binom
 
 def TIPMIP(T_peak=2.5, T_conv=0, t_peak=200, t_end = 1000):
     """ 
@@ -218,3 +219,11 @@ def global_safety(D,safety_threshold=0.1,
 def critical_parameter(D,pars,axis=0,**kwargs):
     return np.max(np.squeeze(local_safety(D,**kwargs))*pars.reshape(len(pars),1),
                   axis=axis)
+
+def aggregate_risk(D,k,axis=1):
+    shape_list = [a for a in range(len(D.shape))]
+    shape_list.append(shape_list.pop(axis))
+    if len(shape_list)==1:
+        return 1-poisson_binom(k,D)
+    else:
+        return 1-poisson_binom.cdf(k,np.transpose(D, shape_list))
