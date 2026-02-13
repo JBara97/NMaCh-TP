@@ -221,6 +221,41 @@ def critical_parameter(D,pars,axis=0,**kwargs):
                   axis=axis)
 
 def aggregate_risk(D,k,axis=1):
+    """ 
+    Given a vector, $D=(D_i)$, of $N$ individual probabilities,
+     aggregate_risk calculates, along the given axis,
+     a cumulative probability that :
+        - $k+1$ or more elements are in the degraded state
+        - $k$ or fewer elements are in the prosperous state
+     (above statements are equivalent to one another)
+    
+    It does this by treating each element as random variable, say $X_i$, 
+     which is 0 for the prosperous state and 1 for the degraded state, 
+     and which is distributed as a Bernoulli random variable. In other words, each element is 
+     Bernoulli distributed with shape parameter $D_i$, $X_i \sim \text{Bern}(D_i)$.
+    
+    In notation this fn outputs $\mathbb{P}(\sum_i X_i > k)$, 
+     which is possible analytically since the sum of independent Bernoulli RVs
+     is Poisson binomial distributed i.e. $Z=\sum_i X_i \sim \text{PB}(D)$
+     [see https://en.wikipedia.org/wiki/Poisson_binomial_distribution]
+
+    Parameters
+    ---
+    D : np.array of floats in [0,1]
+        array of individual probabilities. 
+    k : int. Must be a value in $k \in \{0,\cdots, \text{len}(D)-1\}
+        see above.
+
+    Parameters (optional)
+    ---
+    axis : int. default 1
+        axis over which to aggregate.
+
+    Returns
+    ---
+    out : np.array, 
+        Array of cumulative probabilities. For a D with n>1 dimensions, out will have n-1 dimensions.
+    """
     shape_list = [a for a in range(len(D.shape))]
     shape_list.append(shape_list.pop(axis))
     if len(shape_list)==1:
