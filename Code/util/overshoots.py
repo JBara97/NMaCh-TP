@@ -243,8 +243,8 @@ def k_risk(D,k,axis=1):
     ---
     D : np.array of floats in [0,1]
         array of individual probabilities. 
-    k : int. Must be a value in $k \in \{1,\cdots, D.shape[axis] \}$
-        see above.
+    k : int. 
+        see above. for non-trivial results $k \in \{1,\cdots, D.shape[axis] \}$
 
     Parameters (optional)
     ---
