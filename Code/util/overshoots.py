@@ -226,7 +226,7 @@ def aggregate_risk(D,k,axis=1):
      aggregate_risk calculates, along the given axis,
      a cumulative probability that :
         - $k+1$ or more elements are in the degraded state
-        - $k$ or fewer elements are in the prosperous state
+        - $N-k$ or fewer elements are in the prosperous state
      (above statements are equivalent to one another)
     
     It does this by treating each element as random variable, say $X_i$, 
@@ -243,7 +243,7 @@ def aggregate_risk(D,k,axis=1):
     ---
     D : np.array of floats in [0,1]
         array of individual probabilities. 
-    k : int. Must be a value in $k \in \{0,\cdots, \text{len}(D)-1\}
+    k : int. Must be a value in $k \in \{0,\cdots, \text{len}(D)-1\}$
         see above.
 
     Parameters (optional)
@@ -259,6 +259,6 @@ def aggregate_risk(D,k,axis=1):
     shape_list = [a for a in range(len(D.shape))]
     shape_list.append(shape_list.pop(axis))
     if len(shape_list)==1:
-        return 1-poisson_binom(k,D)
+        return 1-poisson_binom.cdf(k,D)
     else:
         return 1-poisson_binom.cdf(k,np.transpose(D, shape_list))
