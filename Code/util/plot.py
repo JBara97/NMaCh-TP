@@ -208,15 +208,14 @@ class Radar(object):
         if self.wedge_width is None:
             self.wedge_width = 360/self.n # width of each wedge in degrees
 
-        if rotate_labels:
-            labels = []
-            for label, angle in zip(self.ax.get_xticklabels(),self.angles):
-                x,y = label.get_position()
-                lab = self.ax.text(x,y, label.get_text(), transform=label.get_transform(),
-                              ha='center', va='center')
+        # if rotate_labels:
+        for label, angle in zip(self.ax.get_xticklabels(),self.angles):
+            x,y = label.get_position()
+            lab = self.ax.text(x,y, label.get_text(), transform=label.get_transform(),
+                          ha='center', va='center')
+            if rotate_labels:
                 lab.set_rotation(angle-90)
-                labels.append(lab)
-            self.ax.set_xticklabels([])
+        self.ax.set_xticklabels([])
 
         for ax in self.axes[1:]:
             ax.patch.set_visible(False)
@@ -277,9 +276,9 @@ class Radar(object):
             ax.set_ylim(ylim)
 
     def wedge_stacked_bar(self, ax, angle, values, 
-                          width=None, c_list=None, 
+                          width=None, c_list=None,
                           degrees=True, bottom = None, 
-                          edgecolor='none', alpha=0.7,
+                          edgecolor=None, alpha=0.7, c_vals = None,N_col_bins=50,
                           **kwargs):
         if width is None:
             width=np.deg2rad(self.wedge_width)
@@ -290,11 +289,23 @@ class Radar(object):
         
         if bottom is None:
             bottom = ax.get_ylim()[0]
-        for v,c in zip(values,c_list[:len(values)]):
-            ax.bar(angle, v-bottom, 
-                   color=c, 
-                   edgecolor=edgecolor,
-                   alpha=alpha,
-                   width = width,
-                   bottom=bottom, **kwargs)
-            bottom=max(bottom,v)
+        if c_vals is None:
+            for v,c in zip(values,c_list[:len(values)]):
+                ax.bar(angle, v-bottom, 
+                       color=c, 
+                       edgecolor=edgecolor,
+                       alpha=alpha,
+                       width = width,
+                       bottom=bottom, **kwargs)
+                bottom=max(bottom,v)
+        else:
+            cmap = mc.LinearSegmentedColormap.from_list('my_cmap', c_list, N=N_col_bins)
+            for v,cv in zip(values,c_vals):
+                ax.bar(angle, v-bottom,
+                       color=cmap(cv),
+                       edgecolor=edgecolor,
+                       alpha=alpha,
+                       width=width,
+                       bottom=bottom,
+                       **kwargs)
+                bottom=v
