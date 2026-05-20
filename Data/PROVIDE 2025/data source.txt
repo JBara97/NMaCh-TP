@@ -1,0 +1,3 @@
+Robin Lamboll, Joeri Rogelj, & Carl-Friedrich Schleussner. (2025). Scenario emissions and temperature data for PROVIDE project (v1.3.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.11108741
+
+https://pure.iiasa.ac.at/id/eprint/18130/1/essoar.10511875.2.pdf for description
