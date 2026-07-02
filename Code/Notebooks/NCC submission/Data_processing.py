@@ -32,3 +32,6 @@ q_r = 1/(1+df_TEs['Recovery (years)'].to_numpy())
 ### Pre-generated interaction matrices from Wunderling 2024
 len_sample=500
 A = [np.loadtxt('../../../Data/Interaction matrices/Wunderling 2024/A_%s.csv'%r) for r in range(len_sample)]
+
+### Table A2 from Wunderling 2024
+df_interactions = pd.read_excel('../../../Data/Interactions_TableA2.xlsx',usecols='A:F',header=[0],sheet_name='Interactions')
