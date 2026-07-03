@@ -9,8 +9,9 @@ from mpl_toolkits.basemap import Basemap
 import numpy as np
 import seaborn as sns
 from util.overshoots import OS_model
+from util.plot import lighten_color
 
-from Data_processing import df_TEs, df_interactions
+from Data_processing import df_TEs, df_interactions,df
 
 df_TEs_sorted = df_TEs.sort_values(by=["Threshold (°C) – Est."])
 tps = df_TEs_sorted[['Threshold (°C) – Min.','Threshold (°C) – Est.','Threshold (°C) – Max.']].to_numpy()
@@ -252,3 +253,35 @@ def stylisedOS_panel(fig,ax,
     ax.set_ylabel('Temperature (°C)')
     
     ax.set_yticks(stylized_par[:3],temp_names)
+
+def scenarios_panel(fig,ax,
+                    years=np.arange(1850,2301),
+                    t_ref=2015,t_0=1850,
+                    scen_to_plot=['ssp119','ssp534-over','CurPol nz 2120 decline -23800'],
+                    folder='../../../Data/PROVIDE 2025/fair_temperatures/',
+                    colors = ['#00A86B', '#0067A5', '#F04923'],color_h='gray',
+                    labels = ['SSP1-1.9','SSP5-3.4-OS','CurPol-OS'],
+                    zorders=[1,2,1]
+                   ):
+    temps = {s:pd.read_csv(folder+'scen_%s.csv'%s).set_index('year').to_numpy() for s in scen_to_plot}
+    historical = temps[scen_to_plot[0]][:t_ref+1-t_0,:]
+    ax.fill_between(years[:t_ref+1-t_0],
+                    np.quantile(historical,0.25,axis=1),
+                    np.quantile(historical,0.75,axis=1),
+                    color=lighten_color(color_h,0.5),edgecolor='none')
+    ax.plot(years[:t_ref+1-t_0],
+            np.median(historical,axis=1),
+            color=color_h,
+            label='Historical')
+    for i,s in enumerate(scen_to_plot):
+        ax.fill_between(years[t_ref-1850:],
+                        np.quantile(temps[s],0.25,axis=1)[t_ref-1850:],
+                        np.quantile(temps[s],0.75,axis=1)[t_ref-1850:],
+                        color=lighten_color(colors[i],1),alpha=0.5,edgecolor='none',zorder=0)
+        ax.plot(years[t_ref-1850:],
+                np.median(temps[s],axis=1)[t_ref-1850:],
+                color=colors[i],
+                label=labels[i],
+                zorder=zorders[i])
+    
+    ax.legend(edgecolor='k',framealpha=1,title='Scenarios')
