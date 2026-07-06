@@ -219,7 +219,9 @@ def stylisedOS_panel(fig,ax,
                      stylized_par=(1.2,3.5,2,80,20,100),
                      temp_names = [r'$\Delta T_0$', r'$\Delta T_p$', r'$\Delta T_s$'],
                      dur_names = [r'$t_u$', r'$t_p$', r'$t_d$'],
-                     phase_names = ['Ramp up', 'Peak', 'Ramp down', 'Stabilisation']
+                     dur_y = 3.7,
+                     phase_names = ['Ramp up', 'Peak', 'Ramp down', 'Stabilisation'],
+                     phase_y=4.5,
                     ):
     ylim=ax.get_ylim()
     xlim=ax.get_xlim()
@@ -232,11 +234,11 @@ def stylisedOS_panel(fig,ax,
                     (np.sum(stylized_par[3:4+i]),4),
                     arrowprops=dict(facecolor='black',arrowstyle='<|-|>,head_width=0.4,head_length=0.5')
                    )
-        ax.text(np.sum(stylized_par[3:3+i])+stylized_par[3+i]/2, 3.7,
+        ax.text(np.sum(stylized_par[3:3+i])+stylized_par[3+i]/2, dur_y,
                 dur_names[i],va='bottom',ha='center')
-        ax.text(np.sum(stylized_par[3:3+i])+stylized_par[3+i]/2, 4.5,
+        ax.text(np.sum(stylized_par[3:3+i])+stylized_par[3+i]/2, phase_y,
                 phase_names[i],va='bottom',ha='center')
-    ax.text(np.mean([xlim[1],np.sum(stylized_par[3:])]), 4.5,
+    ax.text(np.mean([xlim[1],np.sum(stylized_par[3:])]), phase_y,
                 phase_names[-1],va='bottom',ha='center')
     ax.annotate('',
                 (np.sum(stylized_par[3:]),4), 
@@ -261,7 +263,7 @@ def scenarios_panel(fig,ax,
                     folder='../../../Data/PROVIDE 2025/fair_temperatures/',
                     colors = ['#00A86B', '#0067A5', '#F04923'],color_h='gray',
                     labels = ['SSP1-1.9','SSP5-3.4-OS','CurPol-OS'],
-                    zorders=[1,2,1]
+                    zorders=[1,2,1],legend_title='Scenarios',legend_alpha=1
                    ):
     temps = {s:pd.read_csv(folder+'scen_%s.csv'%s).set_index('year').to_numpy() for s in scen_to_plot}
     historical = temps[scen_to_plot[0]][:t_ref+1-t_0,:]
@@ -284,4 +286,28 @@ def scenarios_panel(fig,ax,
                 label=labels[i],
                 zorder=zorders[i])
     
-    ax.legend(edgecolor='k',framealpha=1,title='Scenarios')
+    ax.legend(edgecolor='k',framealpha=legend_alpha,title=legend_title)
+
+def parDist_panel(fig,axs,popts,
+                  colors = ['#00A86B', '#0067A5', '#F04923'],color_h='gray',
+                  xtick_labels=['Initial', 'Peak', 'Stab.', 'R.-up', 'Peak','R.-down']
+                   ):
+    for i,s in enumerate(list(popts.keys())):
+        axs[0].violinplot([popts[s][:,i] for i in range(3)],widths=0.2,
+                          positions=np.arange(3)+(i-1)*0.2,
+                          facecolor=lighten_color(colors[i],0.4),
+                          linecolor=colors[i],showmedians=True)
+        axs[1].violinplot([popts[s][:,3+i] for i in range(3)],widths=0.2,
+                          positions=np.arange(3)+(i-1)*0.2,
+                          facecolor=lighten_color(colors[i],0.4),
+                          linecolor=colors[i],showmedians=True)
+    axs[0].set_ylabel('Temperature (°C)')
+    axs[0].set_xticks([0,1,2],xtick_labels[:3])
+    
+    axs[1].set_ylabel('Duration (yr)')
+    axs[1].set_xticks([0,1,2],xtick_labels[3:])
+    axs[1].yaxis.tick_right()
+    axs[1].yaxis.set_label_position("right")
+    
+    for i in range(2):
+        axs[i].xaxis.tick_top()
