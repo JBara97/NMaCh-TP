@@ -57,8 +57,8 @@ T_lim_dic = df_TEs['Threshold (°C) – Est.'].to_dict()
 
 node_size=[1600/np.log(df_TEs.loc[n]['Collapse (years)']) for n in G.nodes]
 node_labels = {'GIS':'Greenland ice sheet (GIS)', 'AMOC':'AMOC','ENSO':'ENSO',
-              'WAIS':'West Antarctic ice sheet (WAIS)','ASI':'Arctic sea ice (ASI)','PERM':'Permafrost collapse (PERM)',
-              'WAM':'West African monsoon (WAM)','REEF':'Coral reefs (REEF)','AMAZ':'Amazon dieback (AMAZ)'}
+              'WAIS':'West Antarctic ice sheet (WAIS)','ASI':'Arctic sea ice (ASI)','PERM':'Permafrost (PERM)',
+              'WAM':'West African monsoon (WAM)','REEF':'Coral reefs (REEF)','AMAZ':'Amazon rainforest (AMAZ)'}
 node_label_offsets = {'GIS': np.array([0,0.035]), 
                       'AMOC':np.array([-0.025,0.01]),
                       'ENSO':np.array([-.025,0]),
@@ -68,9 +68,6 @@ node_label_offsets = {'GIS': np.array([0,0.035]),
                       'WAM':np.array([0,0.05]),
                       'REEF':np.array([0,0.05]),
                       'AMAZ':np.array([0,-0.042])}
-node_label_pos = {k:np.array(v) +
-                  node_label_offsets[k]*np.array([xmax,ymax])
-                  for k,v in pos_xy.items()}
 node_label_ha = {k:'center' for k in G.nodes}
 node_label_ha['AMOC'] = 'right'
 node_label_ha['ENSO'] = 'right'
@@ -138,6 +135,9 @@ def network_panel(fig,ax,
                                connectionstyle="arc3,rad=rrr".replace('rrr',str(earc_dic[e])),
                                arrowsize=20
                               );
+    node_label_pos = {k:np.array(v) +
+                      node_label_offsets[k]*np.array([xmax,ymax])
+                      for k,v in pos_xy.items()}
     for n,(x,y) in pos_xy.items():
         ax.annotate(node_labels[n], (x,y), node_label_pos[n],
                     ha=node_label_ha[n],
