@@ -4,6 +4,15 @@ Note that due to data size
 - (500 interaction matrices X 9 tipping elements X 451 time steps X 2237 PROVIDE ensemble members) -
 simulation data for the ensemble dynamics must be run at the point of use.
 
+Scenarios included:
+	ssp119
+	ssp534-over
+	CurPol_OS_1.5C
+		# Note that in the baseline used here, 
+		# the PROVIDE authors had followed the median of the PROVIDE ensemble 
+		# until it reached (near enough) 1.5C, at which point the temperature was externally
+		# fixed to that value (~1.51C) until the very end (year 2300)
+
 For a given scenario, s, structure for Data/Simulations/Overshoots/s/
 
 OAT/
