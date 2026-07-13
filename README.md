@@ -9,10 +9,12 @@ Individual tipping element data (namely, critical threshold estimates)
   - Armstrong McKay et al. 2022 [1]
   - Global Tipping Points Report 2023 [2]
   - Global Tipping Points Report 2025 [3]*
+
 Interaction data
   - Kriegler et al. 2009 [4] (probability factors)
   - Wunderling et al. 2021 [5] (maximum link strength)
   - Wunderling et al. 2024 [6]* (qualitative links)
+
 Global warming temperature scenarios
   - Lee et al. 2021 [7] (extended SSPs)
   - Lamboll et al. 2025 [8] (PROVIDE scenarios)
