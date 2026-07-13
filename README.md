@@ -18,6 +18,7 @@ Interaction data
 Global warming temperature scenarios
   - Lee et al. 2021 [7] (extended SSPs)
   - Lamboll et al. 2025 [8] (PROVIDE scenarios)
+
 *Most recent / comprehensive data used.
 
 ## References
