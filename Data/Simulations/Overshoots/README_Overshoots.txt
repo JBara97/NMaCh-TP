@@ -42,5 +42,5 @@ TAT/
 	# Namely, contains the 2300 tipping (ie aggregate) risk EXCLUDING the reefs
 	# 	and the 2300 individual tipping risk for the coral reefs
 	# Parameter ranges are as follows:
-	#	temp_peak (°C), temp_stab (°C): [0,0.1,...,5] X [0,0.1,...,3]
-	#	temp_stab (°C), time_down (yr): [0,0.1,...,3] X [0,5,...,200]
+	#	temp_peak (°C), temp_stab (°C): [0,0.05,...,5.05] X [0,0.05,...,3.05]
+	#	temp_stab (°C), time_down (yr): [0,0.05,...,3] X [0,5,...,200]
