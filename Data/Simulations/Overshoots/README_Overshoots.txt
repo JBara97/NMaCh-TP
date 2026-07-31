@@ -18,7 +18,13 @@ Scenarios included:
 For a given scenario, s, structure for Data/Simulations/Overshoots/s/
 Ensemble/
 	# Contains summary statistics (over both the interaction matrices AND the fair ensemble)
-	# of individual tipping element risk, such that each file is 451 x 9 
+	# of individual tipping element risk, such that each file is 451 x 9. 
+	# If the filename starts with a T (e.g. T_mean.csv) this is is the summary statistic 
+	# 	for the tipping risk excluding the reefs. In this case this is a 451 long 1D array
+	# Namely, the following stats:
+	#	- mean
+	#	- std
+	#	- 10-, 25-, 50-, 75- and 90- percentiles (eg q10.csv)
 Baseline/
 	interactionMean_indRisk.csv
 	# Contains the simulation run for the baseline (ie the median of the ensemble) 
