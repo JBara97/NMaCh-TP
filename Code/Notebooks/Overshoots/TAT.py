@@ -17,12 +17,12 @@ colors_g = mpl.colormaps['Greens'](np.linspace(0, 1, 12))
 colors_h = mpl.colormaps['cet_fire_r'](np.linspace(0, 1, 12))
 c_offset = 1
 c_list = [colors_g[7]] + [c_h for c_h in colors_h[c_offset:c_offset+9]]
-cmap = LinearSegmentedColormap.from_list('my_cmap', c_list, N=100).with_extremes(bad='white')
+cmap = LinearSegmentedColormap.from_list('my_cmap', c_list, N=1000).with_extremes(bad='white')
 
 def risk_heatmap(x,y,risk,
                  cmap=cmap,label='Tipping risk (%)',
                  clevels=[1,5]+[i for i in range(10,100,10)],ccols=['k'],
-                 vmin=0,vmax=100,ax=None):
+                 vmin=0,vmax=100,ax=None,aspect='auto'):
     if ax is None:
         ax=plt.gca()
     X,Y=np.meshgrid(x,y,indexing='xy')
@@ -37,4 +37,4 @@ def risk_heatmap(x,y,risk,
                          y[-1]+ np.diff(y)[0]/2),
                  origin='lower',
                  vmin=vmin,vmax=vmax,zorder=0,
-                 aspect='auto')
+                 aspect=aspect)
