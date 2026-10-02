@@ -12,15 +12,18 @@ from util.overshoots import OS_model
 from util.plot import lighten_color
 
 from Data_processing import df_TEs, df_interactions,df
-
 df_TEs_sorted = df_TEs.sort_values(by=["Threshold (°C) – Est."])
-tps = df_TEs_sorted[['Threshold (°C) – Min.','Threshold (°C) – Est.','Threshold (°C) – Max.']].to_numpy()
 
 # Pre-making the default Basemap
 m = Basemap(projection='kav7',lon_0=-30,resolution='c',)
 
 # Pre-making the default graph from df_interactions
+exclude_reefs = True
+if exclude_reefs:
+    df_interactions = df_interactions[df_interactions['Target']!='REEF'] 
+    df_TEs_sorted = df_TEs_sorted.drop(index='REEF',errors='ignore')
 G = nx.from_pandas_edgelist(df_interactions,source='Source',target='Target',edge_attr=['min', 'max'],create_using=nx.DiGraph)
+tps = df_TEs_sorted[['Threshold (°C) – Min.','Threshold (°C) – Est.','Threshold (°C) – Max.']].to_numpy()
 
 vmin = -1
 vmax = 9 
@@ -68,6 +71,10 @@ node_label_offsets = {'GIS': np.array([0,0.035]),
                       'WAM':np.array([0,0.05]),
                       'REEF':np.array([0,0.05]),
                       'AMAZ':np.array([0,-0.042])}
+if exclude_reefs:
+    node_label_offsets.pop('REEF', None)
+    node_labels.pop('REEF',None)
+    pos_xy.pop('REEF',None)
 node_label_ha = {k:'center' for k in G.nodes}
 node_label_ha['AMOC'] = 'right'
 node_label_ha['ENSO'] = 'right'
@@ -110,7 +117,7 @@ def network_panel(fig,ax,
                           width, height, fontsize):
         p = mpl.patches.FancyArrow(0, 0.5*height, width, 0, length_includes_head=True, head_width=0.75*height )
         return p
-    
+
     m.fillcontinents(color='tan',lake_color='tan',ax=ax,zorder=1);
     m.drawcoastlines(color='k',zorder=0,ax=ax)    
     
@@ -160,18 +167,19 @@ def network_panel(fig,ax,
     return ax
 
 
+ylim = [-.6,len(tps)-1+.6]
 def threshold_inset(fig,ax,
                     tps=tps, 
                     TEs_labels = df_TEs_sorted.index.values,
                     bbox = bbox_white,
                     xlim=[0,8.3],
-                    ylim=[-.6,8.6],
+                    ylim=ylim,
                    ):
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-    ax.barh(np.arange(9),[z-x for x,y,z in tps],
+    ax.barh(np.arange(len(tps)),[z-x for x,y,z in tps],
             left=[x for x,y,z in tps]) # horizontal
-    ax.set_yticks(np.arange(9),TEs_labels)
+    ax.set_yticks(np.arange(len(tps)),TEs_labels)
     for i,v in enumerate(tps):
         x,y,z=v
         im=ax.imshow(np.linspace(x,z).reshape((1,50)), extent=[x,z,i-0.4,i+0.4], aspect="auto", 
