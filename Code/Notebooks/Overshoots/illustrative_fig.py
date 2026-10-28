@@ -112,6 +112,35 @@ def network_panel(fig,ax,
                   stab_edge_color = 'royalblue',
                   uncl_edge_color = 'gray'
                  ):  
+    """ 
+    Draws the network of interacting tipping elements on top of a world map to indicate (rough) geographic positions.
+
+    Parameters
+    ---
+    fig : matplotlib.Figure
+    ax : matplotlib.Axes
+    node_size : array-like
+    node_cmap : str or matplotlib.colors.Colormap
+    vmin,vmax : float
+    m : mpl.tool_kits.Basemap
+    G : networkx.Graph
+    earc_dic : dictionary
+        Dictionary of edge arcs for each edge
+    pos_xy : dictionary
+        Dictionary of (x,y) positions for each node
+    T_lim_dic : dictionary
+        Dictionary of critical thresholds for each node, determines the color value for each node
+    node_labels, node_label_offsets, node_label_ha, node_label_va : dictionary
+    bbox_node : dictionary
+        Dictionary for the bounding box around a node label
+    dest_edge_color, stab_edge_color, uncl_edge_color : str or color
+        Edge colors for each edge type
+            
+    Returns
+    ---
+    ax : matplotlib.Axes
+    """
+    
     def make_legend_arrow(legend, orig_handle,
                           xdescent, ydescent,
                           width, height, fontsize):
@@ -175,6 +204,20 @@ def threshold_inset(fig,ax,
                     xlim=[0,8.3],
                     ylim=ylim,
                    ):
+    """ 
+    Draws the critical thresholds. Each tipping element gets a bar showing the lower, central and upper estimates.
+
+    Parameters
+    ---
+    fig : matplotlib.Figure
+    ax : matplotlib.Axes
+    tps : array-like
+        Array-like eg list of tuples (lower, central, upper) which are the threshold estimates for each tipping element 
+    TEs_labels : array-like of str
+    bbox : dictionary
+            Dictionary defining the bounding box for each tipping element
+    xlim,ylim : array-like
+    """
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax.barh(np.arange(len(tps)),[z-x for x,y,z in tps],
@@ -202,25 +245,28 @@ def threshold_inset(fig,ax,
              bbox=bbox)
 
 
-def threshold_panel(fig,ax,
-                    cmap='rocket',
-                    vmin=-1,
-                    vmax=9,
-                    ylim=[0,9],
-                    tps=tps, 
-                    TEs_labels = df_TEs_sorted.index.values,):
-    ax.bar(np.arange(9),[z-x for x,y,z in tps],bottom=[x for x,y,z in tps])
-    ax.set_ylim(ylim)
+# def threshold_panel(fig,ax,
+#                     cmap='rocket',
+#                     vmin=-1,
+#                     vmax=9,
+#                     ylim=[0,9],
+#                     tps=tps, 
+#                     TEs_labels = df_TEs_sorted.index.values,):
+#     """ 
     
-    for i,v in enumerate(tps):
-        x,y,z=v
-        ax.imshow(np.linspace(x,z).reshape((50,1)), extent=[i-0.4,i+0.4,x,z], aspect="auto", 
-                  zorder=1,vmin=vmin,vmax=vmax,cmap=cmap,origin='lower')
-        ax.plot([i-0.4,i+0.4],[y]*2,c='k')
+#     """
+#     ax.bar(np.arange(9),[z-x for x,y,z in tps],bottom=[x for x,y,z in tps])
+#     ax.set_ylim(ylim)
     
-    ax.set_xlim(-1,9)
-    ax.set_xticks(np.arange(9),TEs_labels)
-    ax.tick_params("x", rotation=45)
+#     for i,v in enumerate(tps):
+#         x,y,z=v
+#         ax.imshow(np.linspace(x,z).reshape((50,1)), extent=[i-0.4,i+0.4,x,z], aspect="auto", 
+#                   zorder=1,vmin=vmin,vmax=vmax,cmap=cmap,origin='lower')
+#         ax.plot([i-0.4,i+0.4],[y]*2,c='k')
+    
+#     ax.set_xlim(-1,9)
+#     ax.set_xticks(np.arange(9),TEs_labels)
+#     ax.tick_params("x", rotation=45)
 
 
 def stylisedOS_panel(fig,ax,
@@ -231,6 +277,23 @@ def stylisedOS_panel(fig,ax,
                      phase_names = ['Ramp up', 'Peak', 'Ramp down', 'Stabilisation'],
                      phase_y=4.5,
                     ):
+    """ 
+    Draws the stylised overshoot model.
+
+    Parameters
+    ---
+    fig : matplotlib.Figure
+    ax : matplotlib.Axes
+    stylized_par : tuple
+        Tuple of parameter values in the following order 
+        (initial temp, peak temp, stab. temp, 
+            ramp up duration, plateau duration, ramp down duration)
+    temp_names, dur_names, phase_names : list of str
+    dur_y : float
+        y-position of duration names in data coords
+    phase_y : float
+        as above but with phase names
+    """
     ylim=ax.get_ylim()
     xlim=ax.get_xlim()
     xdata = np.arange(300)
@@ -273,6 +336,32 @@ def scenarios_panel(fig,ax,
                     labels = ['SSP1-1.9','SSP5-3.4-OS','CurPol-OS'],
                     zorders=[1,2,1],legend_title='Scenarios',legend_alpha=1
                    ):
+    """ 
+    Draws the (emissions-based) scenarios.
+
+    Parameters
+    ---
+    fig : matplotlib.Figure
+    ax : matplotlib.Axes
+    years : numpy.ndarray:
+        x-position of each time point
+    t_ref : float
+        Final year for the historical data
+    t_0 : float
+        First year
+    scen_to_plot : list of str
+        List of scenario names, must match the names from the fair_temperature ensembles
+    colors : list of colors
+        In order, the colours for each scenario
+    color_h : color
+        The color for historical data
+    labels : list of str
+        list of labels for the scenarios
+    zorders : list of int
+        The zorders for the median trajectories
+    legend_title : str
+    legend_alpha : float in [0,1]
+    """
     temps = {s:pd.read_csv(folder+'scen_%s.csv'%s).set_index('year').to_numpy() for s in scen_to_plot}
     historical = temps[scen_to_plot[0]][:t_ref+1-t_0,:]
     ax.fill_between(years[:t_ref+1-t_0],
@@ -300,6 +389,24 @@ def parDist_panel(fig,axs,popts,
                   colors = ['#00A86B', '#0067A5', '#F04923'],color_h='gray',
                   xtick_labels=['Initial', 'Peak', 'Stab.', 'R.-up', 'Peak','R.-down']
                    ):
+    """ 
+    Draws the distribution (as violin plots) of parameters fitted to the emissions-based scenarios.
+
+    Parameters
+    ---
+    fig : matplotlib.Figure
+    axs : list of matplotlib.Axes
+        A list of two axes, where the first is for the temperature parameters and 
+        the second is for the duration parameters (since they have different scales and units)
+    popts: dictionary
+        Dictionary with scenario names as keys and which take arrays as values. 
+        Each array is N x 6 where N is the number of trajectories fitted to
+    colors : list of colors
+        In order, the colours for each scenario
+    color_h : color
+        The color for historical data
+    x_tick_labels : list of str
+    """
     for i,s in enumerate(list(popts.keys())):
         axs[0].violinplot([popts[s][:,i] for i in range(3)],widths=0.2,
                           positions=np.arange(3)+(i-1)*0.2,
